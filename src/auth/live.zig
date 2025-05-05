@@ -77,7 +77,7 @@ pub fn refreshToken(allocator: std.mem.Allocator, token: DevicePollResponse) !st
     try checkCode(setopt(curl, c.CURLOPT_URL, "https://login.live.com/oauth20_token.srf"));
 
     const headers = c.curl_slist_append(null, "Content-Type: application/x-www-form-urlencoded");
-    _ = c.curl_easy_setopt(curl, c.CURLOPT_HTTPHEADER, headers);
+    try checkCode(setopt(curl, c.CURLOPT_HTTPHEADER, headers));
     defer c.curl_slist_free_all(headers);
 
     const body = try std.fmt.allocPrint(allocator, "client_id=0000000048183522&scope=service::user.auth.xboxlive.com::MBI_SSL&grant_type=refresh_token&refresh_token={s}", .{token.refresh_token});
@@ -140,7 +140,7 @@ pub fn pollDeviceAuth(
     try checkCode(setopt(curl, c.CURLOPT_URL, "https://login.live.com/oauth20_token.srf"));
 
     const headers = c.curl_slist_append(null, "Content-Type: application/x-www-form-urlencoded");
-    _ = c.curl_easy_setopt(curl, c.CURLOPT_HTTPHEADER, headers);
+    try checkCode(setopt(curl, c.CURLOPT_HTTPHEADER, headers));
     defer c.curl_slist_free_all(headers);
 
     const body = try std.fmt.allocPrint(allocator, "client_id=0000000048183522&grant_type=urn:ietf:params:oauth:grant-type:device_code&device_code={s}", .{deviceCode});
@@ -149,8 +149,8 @@ pub fn pollDeviceAuth(
     try checkCode(setopt(curl, c.CURLOPT_POSTFIELDSIZE, body.len));
     try checkCode(setopt(curl, c.CURLOPT_POSTFIELDS, body.ptr));
 
-    try checkCode(c.curl_easy_setopt(curl, c.CURLOPT_WRITEDATA, &responseBody));
-    try checkCode(c.curl_easy_setopt(curl, c.CURLOPT_WRITEFUNCTION, utils.bufferWriteCallback));
+    try checkCode(setopt(curl, c.CURLOPT_WRITEDATA, &responseBody));
+    try checkCode(setopt(curl, c.CURLOPT_WRITEFUNCTION, utils.bufferWriteCallback));
 
     const res = c.curl_easy_perform(curl);
     if (res != c.CURLE_OK) {

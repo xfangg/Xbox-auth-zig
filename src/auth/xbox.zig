@@ -63,13 +63,13 @@ pub fn requestToken(allocator: std.mem.Allocator, liveToken: live.DevicePollResp
     const curl = c.curl_easy_init() orelse return errors.CurlFailCreate;
     defer c.curl_easy_cleanup(curl);
 
-    try checkCode(c.curl_easy_setopt(curl, c.CURLOPT_URL, "https://user.auth.xboxlive.com/user/authenticate"));
+    try checkCode(setopt(curl, c.CURLOPT_URL, "https://user.auth.xboxlive.com/user/authenticate"));
 
     var headers = c.curl_slist_append(null, "Content-Type: application/json");
     headers = c.curl_slist_append(headers, "Accept: application/json");
     defer c.curl_slist_free_all(headers);
 
-    try checkCode(c.curl_easy_setopt(curl, c.CURLOPT_HTTPHEADER, headers));
+    try checkCode(setopt(curl, c.CURLOPT_HTTPHEADER, headers));
 
     const ticket = try std.fmt.allocPrint(allocator, "t={s}", .{liveToken.access_token});
     defer allocator.free(ticket);
@@ -92,8 +92,8 @@ pub fn requestToken(allocator: std.mem.Allocator, liveToken: live.DevicePollResp
     try checkCode(setopt(curl, c.CURLOPT_POSTFIELDSIZE, body.items.len));
     try checkCode(setopt(curl, c.CURLOPT_POSTFIELDS, body.items.ptr));
 
-    try checkCode(c.curl_easy_setopt(curl, c.CURLOPT_WRITEDATA, &responseBody));
-    try checkCode(c.curl_easy_setopt(curl, c.CURLOPT_WRITEFUNCTION, utils.bufferWriteCallback));
+    try checkCode(setopt(curl, c.CURLOPT_WRITEDATA, &responseBody));
+    try checkCode(setopt(curl, c.CURLOPT_WRITEFUNCTION, utils.bufferWriteCallback));
 
     const res = c.curl_easy_perform(curl);
     if (res != c.CURLE_OK) {
@@ -111,13 +111,13 @@ pub fn requestXBLToken(allocator: std.mem.Allocator, token: XboxTokenResponse, r
     const curl = c.curl_easy_init() orelse return errors.CurlFailCreate;
     defer c.curl_easy_cleanup(curl);
 
-    try checkCode(c.curl_easy_setopt(curl, c.CURLOPT_URL, "https://xsts.auth.xboxlive.com/xsts/authorize"));
+    try checkCode(setopt(curl, c.CURLOPT_URL, "https://xsts.auth.xboxlive.com/xsts/authorize"));
 
     var headers = c.curl_slist_append(null, "Content-Type: application/json");
     headers = c.curl_slist_append(headers, "Accept: application/json");
     defer c.curl_slist_free_all(headers);
 
-    try checkCode(c.curl_easy_setopt(curl, c.CURLOPT_HTTPHEADER, headers));
+    try checkCode(setopt(curl, c.CURLOPT_HTTPHEADER, headers));
 
     const request = XSTSTokenRequest{
         .Properties = XSTSTokenProperties{
@@ -136,8 +136,8 @@ pub fn requestXBLToken(allocator: std.mem.Allocator, token: XboxTokenResponse, r
     try checkCode(setopt(curl, c.CURLOPT_POSTFIELDSIZE, body.items.len));
     try checkCode(setopt(curl, c.CURLOPT_POSTFIELDS, body.items.ptr));
 
-    try checkCode(c.curl_easy_setopt(curl, c.CURLOPT_WRITEDATA, &responseBody));
-    try checkCode(c.curl_easy_setopt(curl, c.CURLOPT_WRITEFUNCTION, utils.bufferWriteCallback));
+    try checkCode(setopt(curl, c.CURLOPT_WRITEDATA, &responseBody));
+    try checkCode(setopt(curl, c.CURLOPT_WRITEFUNCTION, utils.bufferWriteCallback));
 
     const res = c.curl_easy_perform(curl);
     if (res != c.CURLE_OK) {
